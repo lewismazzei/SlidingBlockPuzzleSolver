@@ -4,14 +4,17 @@ import java.util.Set;
 import java.util.HashSet;
 
 public class Puzzle {
+    String[] SOLVABLE = new String[]{"3", "3", "1", "2", "0", "5", "7", "3", "4", "8", "6"};
+    String[] UNSOLVABLE = new String[]{"4", "4", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "15", "14", "0"};
+
     int n, m;
     public int[][] pieces;
 
     public Puzzle() {
-        String[] extended_example =
-            new String[]{"3", "3", "1", "2", "0", "5", "7", "3", "4", "8", "6"};
-        initialise_dimensions(extended_example);
-        initialise_pieces(extended_example);
+        String[] puzzle = SOLVABLE;
+
+        initialise_dimensions(puzzle);
+        initialise_pieces(puzzle);
     }
 
     public Puzzle(String[] data) {
@@ -77,6 +80,44 @@ public class Puzzle {
             System.exit(0);
         }
         return true;
+    }
+
+    public boolean isSolvable() {
+        boolean blankIsOnOddRowFromBottom = true;
+
+        int[] pieces_list = new int[n * m];
+        for (int i = 0; i < this.n; i++) {
+            for (int j = 0; j < this.m; j++) {
+                if (pieces[i][j] == 0) {
+                    blankIsOnOddRowFromBottom = isOdd(n);
+                }
+                pieces_list[j + (i * m)] = pieces[i][j];
+            }
+        }
+
+        int inversions = 0;
+        for (int i = 0; i < pieces_list.length; i++) {
+            for (int j = i + 1; j < pieces_list.length; j++) {
+                if (pieces_list[i] > pieces_list[j]) {
+                    inversions += 1;
+                }
+            }
+        }
+
+        if ((isOdd(this.m) && isEven(inversions))
+                || (isEven(this.m) && (blankIsOnOddRowFromBottom == isEven(inversions)))) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private boolean isOdd(int n) {
+        return n % 2 != 0;
+    }
+
+    private boolean isEven(int n) {
+        return n % 2 == 0;
     }
 
     @Override
