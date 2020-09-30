@@ -1,85 +1,70 @@
 package src.main;
 
-import java.util.Set;
 import java.util.HashSet;
 
 public class Puzzle {
     String[] SOLVABLE = new String[]{"3", "3", "1", "2", "0", "5", "7", "3", "4", "8", "6"};
     String[] UNSOLVABLE = new String[]{"4", "4", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "15", "14", "0"};
 
-    int n, m;
-    public int[][] pieces;
+    private int n, m;
+    private int[][] pieces;
 
     public Puzzle() {
-        String[] puzzle = SOLVABLE;
-
-        initialise_dimensions(puzzle);
-        initialise_pieces(puzzle);
+        initialise_dimensions(SOLVABLE);
+        initialise_pieces(SOLVABLE);
     }
 
     public Puzzle(String[] data) {
-        if (data.length <= 2) {
-            System.err.println("usage: m n p(1) ... p(n * m)");
-            System.exit(0);
-        }
-        initialise_dimensions(data);
-        initialise_pieces(data);
-    }
-
-    private void initialise_dimensions(String[] data) {
         try {
-            this.n = Integer.parseInt(data[1]);
-            this.m = Integer.parseInt(data[0]);
-            if (m < 2 || n < 2) {
-                throw new IllegalArgumentException();
-            }
-        } catch (IllegalArgumentException e) {
-            System.err.println("usage: m & n must be integers (> 1)");
-            System.exit(0);
-        }
-
-        // validate number of args
-        if (data.length - 2 != this.n * this.m) {
-            System.err.printf("usage: %d pieces and a blank space (0) must be provided for a board of this size (%d %s)\n",
-                this.n * this.m - 1, data.length - 2, data.length - (this.n * this.m + 2) < 0 ? "short" : "too many");
+            initialise_dimensions(data);
+            initialise_pieces(data);
+        } catch (NumberFormatException e) {
+            System.err.println("[non-integer argument(s) provided]");
             System.exit(0);
         }
     }
 
-    private void initialise_pieces(String[] data) {
+    private void initialise_dimensions(String[] data) throws NumberFormatException {
+        this.n = Integer.parseInt(data[1]);
+        this.m = Integer.parseInt(data[0]);
+        if (n < 2 || m < 2) {
+            System.err.printf("[provided dimension(s) (n=%s, m=$s) are out of range]\n", this.n, this.m);
+            System.err.println("both n and m must be > 1");
+            System.exit(0);
+        }
+        if (data.length != this.n * this.m + 2) {
+            System.err.printf("[provided number of arguments (%s) is invalid]\n", data.length);
+            System.err.println("total number of arguments must equal (arg1 * arg2 + 2}\n");
+            System.exit(0);
+        }
+    }
+
+    private void initialise_pieces(String[] data) throws NumberFormatException {
         this.pieces = new int[this.n][this.m];
 
-        Set<Integer> seen = new HashSet<Integer>();
-        int pointer = 2;
-
+        int piece = 0, index = 2;
+        var seen = new HashSet<Integer>();
         for (int i = 0; i < this.n; i++) {
             for (int j = 0; j < this.m; j++) {
-                if (isValidPiece(data[pointer], seen)) {
-                    int piece = Integer.parseInt(data[pointer]);
-
-                    this.pieces[i][j] = piece;
-                    seen.add(piece);
-
-                    pointer++;
+                boolean isPieceoutOfRange = false;
+                piece = Integer.parseInt(data[index]);
+                if (piece < 0 || piece > this.n * this.m - 1) {
+                    System.err.printf("[provided piece (%s) is out of range]\n", piece);
+                    isPieceoutOfRange = true;
                 }
+                if (!seen.add(piece)) {
+                    System.err.printf("[provided piece (%s) appears more than once]\n", piece);
+                    isPieceoutOfRange = true;
+                }
+                if (isPieceoutOfRange) {
+                    System.err.println("provided pieces must be equivalent to the set {0, ..., n * m - 1}");
+                    System.exit(0);
+                }
+                this.pieces[i][j] = piece;
+                seen.add(piece);
+                index++;
             }
         }
-    }
-
-    private boolean isValidPiece(String s, Set<Integer> seen) {
-        try {
-            int piece = Integer.parseInt(s);
-            if (piece < 0 || piece > this.n * this.m - 1) {
-                throw new IllegalArgumentException();
-            }
-            if (!seen.add(piece)) {
-                throw new IllegalArgumentException();
-            }
-        } catch (IllegalArgumentException e) {
-            System.err.printf("usage: p(1) ... p(n * m) must be unique integers in the range 0 to n * m - 1\n", s);
-            System.exit(0);
-        }
-        return true;
     }
 
     public boolean isSolvable() {
