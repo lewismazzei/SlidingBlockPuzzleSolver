@@ -19,7 +19,7 @@ public class Puzzle {
 
     public Puzzle(String[] data) {
         if (data.length <= 2) {
-            System.out.print("usage: m n p(1) ... p(m*n)\n");
+            System.err.println("usage: m n p(1) ... p(n * m)");
             System.exit(0);
         }
         initialise_dimensions(data);
@@ -34,14 +34,14 @@ public class Puzzle {
                 throw new IllegalArgumentException();
             }
         } catch (IllegalArgumentException e) {
-            System.out.print("exit: m and n must be integers (> 1)\n");
+            System.err.println("usage: m & n must be integers (> 1)");
             System.exit(0);
         }
 
         // validate number of args
         if (data.length - 2 != this.n * this.m) {
-            System.out.printf("usage: %d pieces must be provided for a board of this size (%d provided)\n",
-                this.n * this.m - 1, data.length - 2);
+            System.err.printf("usage: %d pieces and a blank space (0) must be provided for a board of this size (%d %s)\n",
+                this.n * this.m - 1, data.length - 2, data.length - (this.n * this.m + 2) < 0 ? "short" : "too many");
             System.exit(0);
         }
     }
@@ -76,7 +76,7 @@ public class Puzzle {
                 throw new IllegalArgumentException();
             }
         } catch (IllegalArgumentException e) {
-            System.out.printf("exit: invalid piece (%s)", s);
+            System.err.printf("usage: p(1) ... p(n * m) must be unique integers in the range 0 to n * m - 1\n", s);
             System.exit(0);
         }
         return true;
