@@ -89,8 +89,8 @@ public class Puzzle {
             }
         }
 
-        if ((isOdd(this.m) && isEven(inversions))
-                || (isEven(this.m) && (blankIsOnOddRowFromBottom == isEven(inversions)))) {
+        // solvability formula taken from https://www.cs.bham.ac.uk/~mdr/teaching/modules04/java2/TilesSolvability.html
+        if ((isOdd(this.m) && isEven(inversions)) || (isEven(this.m) && (blankIsOnOddRowFromBottom == isEven(inversions)))) {
             return true;
         } else {
             return false;
