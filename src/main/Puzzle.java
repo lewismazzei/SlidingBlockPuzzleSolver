@@ -3,94 +3,109 @@ package src.main;
 import java.util.HashSet;
 
 public class Puzzle {
-    String[] SOLVABLE = new String[]{"3", "3", "1", "2", "0", "5", "7", "3", "4", "8", "6"};
-    String[] UNSOLVABLE = new String[]{"4", "4", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "15", "14", "0"};
-
     private int n, m;
-    private int[][] pieces;
+    private int[][] blocks;
 
-    public Puzzle() {
-        initialise_dimensions(SOLVABLE);
-        initialise_pieces(SOLVABLE);
-    }
-
-    public Puzzle(String[] data) {
+    public Puzzle(String[] in) {
         try {
-            initialise_dimensions(data);
-            initialise_pieces(data);
+            initialise_dimensions(in);
+            initialise_pieces(in);
         } catch (NumberFormatException e) {
             System.err.println("[non-integer argument(s) provided]");
             System.exit(0);
         }
     }
 
-    private void initialise_dimensions(String[] data) throws NumberFormatException {
-        this.n = Integer.parseInt(data[1]);
-        this.m = Integer.parseInt(data[0]);
+    public Puzzle(Puzzle parentPuzzle, int pieceToMove) {
+        n = parentPuzzle.n;
+        m = parentPuzzle.m;
+
+        blocks = new int[n][m];
+        for (int row = 0; row < parentPuzzle.n; row++) {
+            for (int col = 0; col < parentPuzzle.m; col++) {
+                int currentPiece = parentPuzzle.blocks[row][col];
+                if (currentPiece == pieceToMove) {
+                    currentPiece = 0;
+                } else if (currentPiece == 0) {
+                    currentPiece = pieceToMove;
+                }
+                blocks[row][col] = currentPiece;
+            }
+        }
+    }
+
+    private void initialise_dimensions(String[] in) throws NumberFormatException {
+        n = Integer.parseInt(in[0]);
+        m = Integer.parseInt(in[1]);
         if (n < 2 || m < 2) {
-            System.err.printf("[provided dimension(s) (n=%s, m=$s) are out of range]\n", this.n, this.m);
+            System.err.printf("[provided dimension(s) (n=%s, m=$s) are out of range]\n", n, m);
             System.err.println("both n and m must be > 1");
             System.exit(0);
         }
-        if (data.length != this.n * this.m + 2) {
-            System.err.printf("[provided number of arguments (%s) is invalid]\n", data.length);
-            System.err.println("total number of arguments must equal (arg1 * arg2 + 2}\n");
+        if (in.length != n * m + 2) {
+            System.err.printf("[provided number of arguments (%s) is invalid]\n", in.length);
+            System.err.println("total number of arguments must equal: arg1 * arg2 + 2\n");
             System.exit(0);
         }
     }
 
-    private void initialise_pieces(String[] data) throws NumberFormatException {
-        this.pieces = new int[this.n][this.m];
+    private void initialise_pieces(String[] in) throws NumberFormatException {
+        blocks = new int[n][m];
 
-        int piece = 0, index = 2;
+        int block = 0, inIndex = 2;
         var seen = new HashSet<Integer>();
-        for (int i = 0; i < this.n; i++) {
-            for (int j = 0; j < this.m; j++) {
-                boolean isPieceoutOfRange = false;
-                piece = Integer.parseInt(data[index]);
-                if (piece < 0 || piece > this.n * this.m - 1) {
-                    System.err.printf("[provided piece (%s) is out of range]\n", piece);
-                    isPieceoutOfRange = true;
+        for (int row = 0; row < n; row++) {
+            for (int col = 0; col < m; col++) {
+                boolean isPieceInvalid = false;
+                block = Integer.parseInt(in[inIndex]);
+                if (block < 0 || block > n * m - 1) {
+                    System.err.printf("[provided piece (%s) is out of range]\n", block);
+                    isPieceInvalid = true;
                 }
-                if (!seen.add(piece)) {
-                    System.err.printf("[provided piece (%s) appears more than once]\n", piece);
-                    isPieceoutOfRange = true;
+                if (!seen.add(block)) {
+                    System.err.printf("[provided piece (%s) appears more than once]\n", block);
+                    isPieceInvalid = true;
                 }
-                if (isPieceoutOfRange) {
-                    System.err.println("provided pieces must be equivalent to the set {0, ..., n * m - 1}");
+                if (isPieceInvalid) {
+                    System.err.println("[provided pieces must be equivalent to the set {0, ..., n * m - 1}]");
                     System.exit(0);
                 }
-                this.pieces[i][j] = piece;
-                seen.add(piece);
-                index++;
+                blocks[row][col] = block;
+                seen.add(block);
+                inIndex++;
             }
         }
     }
 
     public boolean isSolvable() {
-        boolean blankIsOnOddRowFromBottom = true;
+        boolean isBlankOnOddRowFromBottom = false;
 
-        int[] pieces_list = new int[n * m];
-        for (int i = 0; i < this.n; i++) {
-            for (int j = 0; j < this.m; j++) {
-                if (pieces[i][j] == 0) {
-                    blankIsOnOddRowFromBottom = isOdd(n);
+        int[] blocksList = new int[n * m];
+        for (int row = 0; row < n; row++) {
+            for (int col = 0; col < m; col++) {
+                if (blocks[row][col] == 0) {
+                    if (isEven(n) && isOdd(row)) {
+                        isBlankOnOddRowFromBottom = false;
+                    } else {
+                        isBlankOnOddRowFromBottom = true;
+                    }
                 }
-                pieces_list[j + (i * m)] = pieces[i][j];
+                blocksList[col + (row * m)] = blocks[row][col];
             }
         }
 
-        int inversions = 0;
-        for (int i = 0; i < pieces_list.length; i++) {
-            for (int j = i + 1; j < pieces_list.length; j++) {
-                if (pieces_list[i] > pieces_list[j]) {
-                    inversions += 1;
+        int inversionCount = 0;
+        for (int i = 0; i < blocksList.length - 1; i++) {
+            for (int j = i + 1; j < blocksList.length; j++) {
+                if (blocksList[i] > blocksList[j] && blocksList[j] != 0) {
+                    inversionCount += 1;
                 }
             }
         }
 
-        // solvability formula taken from https://www.cs.bham.ac.uk/~mdr/teaching/modules04/java2/TilesSolvability.html
-        if ((isOdd(this.m) && isEven(inversions)) || (isEven(this.m) && (blankIsOnOddRowFromBottom == isEven(inversions)))) {
+        // credit: https://www.cs.bham.ac.uk/~mdr/teaching/modules04/java2/TilesSolvability.html
+        if ((isOdd(m) && isEven(inversionCount))
+                || (isEven(m) && (isBlankOnOddRowFromBottom == isEven(inversionCount)))) {
             return true;
         } else {
             return false;
@@ -108,13 +123,29 @@ public class Puzzle {
     @Override
     public String toString() {
         StringBuilder s = new StringBuilder();
-        for (int i = 0; i < this.n; i++) {
-            for (int j = 0; j < this.m; j++) {
-                s.append(this.pieces[i][j]);
+        for (int row = 0; row < n; row++) {
+            for (int col = 0; col < m; col++) {
+                s.append(blocks[row][col]);
                 s.append(" ");
             }
             s.append("\n");
         }
         return s.toString();
+    }
+
+    public int getN() {
+        return n;
+    }
+
+    public int getM() {
+        return m;
+    }
+
+    public int getBlock(int row, int col) {
+        return blocks[row][col];
+    }
+
+    public int[][] getBlocks() {
+        return blocks;
     }
 }
