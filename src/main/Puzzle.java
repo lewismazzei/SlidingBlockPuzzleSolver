@@ -1,6 +1,6 @@
 package src.main;
 
-import java.util.HashSet;
+import java.util.*;
 
 public class Puzzle {
     private int n, m;
@@ -118,6 +118,29 @@ public class Puzzle {
 
     private boolean isEven(int n) {
         return n % 2 == 0;
+    }
+
+    public int manhattanDistance() {
+        int distance = 0;
+        for (int row = 0; row < n; row++) {
+            for (int col = 0; col < m; col++) {
+                int block = blocks[row][col];
+                if (block != 0) {
+                    distance += Math.abs(goalRow(block, m) - row);
+                    distance += Math.abs(goalCol(block, m) - col);
+                }
+            }
+        }
+        return distance;
+    }
+
+    private static int goalRow(int block, int puzzle_width) {
+        return (int) Math.floor((double) (block - 1) / (double) puzzle_width);
+
+    }
+
+    private static int goalCol(int block, int puzzle_width) {
+        return (block - 1) % puzzle_width;
     }
 
     @Override
