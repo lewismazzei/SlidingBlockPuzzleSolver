@@ -6,14 +6,14 @@ public class Puzzle {
     private int n, m;
     private int[][] blocks;
 
-    public Puzzle(String[] in) {
-        try {
-            initialise_dimensions(in);
-            initialise_pieces(in);
-        } catch (NumberFormatException e) {
-            System.err.println("[non-integer argument(s) provided]");
+    public Puzzle(int n, int m, int[] blocksList) {
+        if (n < 2 || m < 2) {
+            System.err.printf("[provided dimension(s) (n=%s, m=%s) are out of range: n && m > 1]\n", n, m);
             System.exit(0);
         }
+        this.n = n;
+        this.m = m;
+        initialiseBlocks(blocksList);
     }
 
     public Puzzle(Puzzle parentPuzzle, int pieceToMove) {
@@ -34,61 +34,36 @@ public class Puzzle {
         }
     }
 
-    private void initialise_dimensions(String[] in) throws NumberFormatException {
-        n = Integer.parseInt(in[0]);
-        m = Integer.parseInt(in[1]);
-        if (n < 2 || m < 2) {
-            System.err.printf("[provided dimension(s) (n=%s, m=$s) are out of range]\n", n, m);
-            System.err.println("both n and m must be > 1");
-            System.exit(0);
-        }
-        if (in.length != n * m + 2) {
-            System.err.printf("[provided number of arguments (%s) is invalid]\n", in.length);
-            System.err.println("total number of arguments must equal: arg1 * arg2 + 2\n");
-            System.exit(0);
-        }
-    }
-
-    private void initialise_pieces(String[] in) throws NumberFormatException {
+    private void initialiseBlocks(int[] blocksList) {
         blocks = new int[n][m];
 
-        int block = 0, inIndex = 2;
+        int i = 0;
         var seen = new HashSet<Integer>();
         for (int row = 0; row < n; row++) {
             for (int col = 0; col < m; col++) {
-                boolean isPieceInvalid = false;
-                block = Integer.parseInt(in[inIndex]);
-                if (block < 0 || block > n * m - 1) {
-                    System.err.printf("[provided piece (%s) is out of range]\n", block);
-                    isPieceInvalid = true;
-                }
-                if (!seen.add(block)) {
-                    System.err.printf("[provided piece (%s) appears more than once]\n", block);
-                    isPieceInvalid = true;
-                }
-                if (isPieceInvalid) {
-                    System.err.println("[provided pieces must be equivalent to the set {0, ..., n * m - 1}]");
+                if (blocksList[i] < 0 || blocksList[i] > n * m - 1) {
+                    System.err.printf("-1\n[block (%s) is out of range: {0, 1, ..., n*m-1}]\n", blocksList[i]);
                     System.exit(0);
                 }
-                blocks[row][col] = block;
-                seen.add(block);
-                inIndex++;
+                if (!seen.add(blocksList[i])) {
+                    System.err.printf("-1\n[block (%s) appears more than once]\n", blocksList[i]);
+                    System.exit(0);
+                }
+                blocks[row][col] = blocksList[i];
+                seen.add(blocksList[i]);
+                i++;
             }
         }
     }
 
     public boolean isSolvable() {
-        boolean isBlankOnOddRowFromBottom = false;
+        int rowWithBlank = 0;
 
         int[] blocksList = new int[n * m];
         for (int row = 0; row < n; row++) {
             for (int col = 0; col < m; col++) {
                 if (blocks[row][col] == 0) {
-                    if (isEven(n) && isOdd(row)) {
-                        isBlankOnOddRowFromBottom = false;
-                    } else {
-                        isBlankOnOddRowFromBottom = true;
-                    }
+                    rowWithBlank = row;
                 }
                 blocksList[col + (row * m)] = blocks[row][col];
             }
@@ -96,16 +71,17 @@ public class Puzzle {
 
         int inversionCount = 0;
         for (int i = 0; i < blocksList.length - 1; i++) {
-            for (int j = i + 1; j < blocksList.length; j++) {
-                if (blocksList[i] > blocksList[j] && blocksList[j] != 0) {
-                    inversionCount += 1;
+            if (blocksList[i] != 0) {
+                for (int j = i + 1; j < blocksList.length; j++) {
+                    if (blocksList[j] != 0 && blocksList[i] > blocksList[j]) {
+                        inversionCount += 1;
+                    }
                 }
             }
         }
 
         // credit: https://www.cs.bham.ac.uk/~mdr/teaching/modules04/java2/TilesSolvability.html
-        if ((isOdd(m) && isEven(inversionCount))
-                || (isEven(m) && (isBlankOnOddRowFromBottom == isEven(inversionCount)))) {
+        if ((isOdd(m) && isEven(inversionCount)) || (isEven(m) && (isOdd(n - rowWithBlank) == isEven(inversionCount)))) {
             return true;
         } else {
             return false;
