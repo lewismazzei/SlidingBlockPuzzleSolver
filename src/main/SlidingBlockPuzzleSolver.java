@@ -10,7 +10,7 @@ public class SlidingBlockPuzzleSolver {
         try {
             n = scanner.nextInt();
             m = scanner.nextInt();
-            int[] blocks = new int[n * m];
+            Integer[] blocks = new Integer[n * m];
             for (int i = 0; i < n * m; i++) {
                 blocks[i] = scanner.nextInt();
             }

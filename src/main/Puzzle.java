@@ -6,9 +6,9 @@ public class Puzzle {
     private int n, m;
     private int[][] blocks;
 
-    public Puzzle(int n, int m, int[] blocksList) {
+    public Puzzle(int n, int m, Integer[] blocksList) {
         if (n < 2 || m < 2) {
-            System.err.printf("[provided dimension(s) (n=%s, m=%s) are out of range: n && m > 1]\n", n, m);
+            System.err.printf("-1\n[provided dimension(s) (n=%s, m=%s) are out of range: n && m > 1]\n", n, m);
             System.exit(0);
         }
         this.n = n;
@@ -34,7 +34,7 @@ public class Puzzle {
         }
     }
 
-    private void initialiseBlocks(int[] blocksList) {
+    private void initialiseBlocks(Integer[] blocksList) {
         blocks = new int[n][m];
 
         int i = 0;

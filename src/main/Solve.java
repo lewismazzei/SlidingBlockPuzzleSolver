@@ -3,13 +3,13 @@ package src.main;
 import java.util.*;
 
 public class Solve {
-    static class ManhattanHeuristic implements Comparator<State> {
+    public static class ManhattanHeuristic implements Comparator<State> {
         @Override
         public int compare(State state1, State state2) {
             return state1.getH() - state2.getH();
         }
     }
-    static class TotalDistanceHeuristic implements Comparator<State> {
+    public static class TotalDistanceHeuristic implements Comparator<State> {
         @Override
         public int compare(State state1, State state2) {
             return (state1.getMoves().length + state1.getH()) - (state2.getMoves().length + state2.getH());
@@ -17,6 +17,9 @@ public class Solve {
     }
 
     public static String bestFirstSearch(Puzzle puzzle, Comparator<State> heuristic) {
+        long startTime = System.currentTimeMillis();
+        // System.out.println(puzzle);
+
         if (!puzzle.isSolvable()) {
             return "0";
         }
@@ -26,13 +29,15 @@ public class Solve {
 
         var visitedStates = new HashSet<State>();
 
-        while (frontier.peek() != null) {
+        while (frontier.peek() != null && System.currentTimeMillis() - startTime < 50) {
             State currentState = frontier.poll();
             if (currentState.getH() == 0) {
                 var s = new StringBuilder(String.format("1 %d", currentState.getMoves().length));
                 for (int move : currentState.getMoves()) {
                     s.append(String.format(" %d", move));
                 }
+                s.append("\n\n");
+                s.append(String.format("%d ms taken", System.currentTimeMillis() - startTime));
                 return s.toString();
             } else {
                 ArrayList<State> childStates = childStates(currentState);
@@ -70,7 +75,7 @@ public class Solve {
                         pieceToMove = blocks[row][col - 1];
                         children.add(new State(parentState, pieceToMove));
                     }
-                    if (col < n - 1) {
+                    if (col < m - 1) {
                         pieceToMove = blocks[row][col + 1];
                         children.add(new State(parentState, pieceToMove));
                     }
