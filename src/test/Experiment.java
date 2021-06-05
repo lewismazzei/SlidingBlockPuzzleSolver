@@ -67,14 +67,6 @@ class Experiment {
         long totalInstances = factorial(n*m);
         long percentComplete = instanceCount / totalInstances * 100;
         System.out.print(instanceCount + " / " + totalInstances + "\r");
-        // System.out.print("|");
-        // for (long i = 0; i < Math.floor(percentComplete / 5); i++) {
-        //     System.out.print("=");
-        // }
-        // for (int i = 0; i < 20 - Math.floor(percentComplete / 5); i++) {
-        //     System.out.print(" ");
-        // }
-        // System.out.print("|\r");
     }
     public static long factorial(int x) {
         long fact = 1;
