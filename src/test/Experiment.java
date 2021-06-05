@@ -27,7 +27,6 @@ class Experiment {
                 System.out.println();
             }
         }
-        // System.exit(0);
     }
 
     private static void performExperiment(int n, int m, Permutations<Integer> instances) {
