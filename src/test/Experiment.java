@@ -2,15 +2,12 @@ package src.test;
 
 import java.io.File;
 import java.io.FileWriter;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Scanner;
 
 import src.main.Puzzle;
 import src.main.Solve;
 
 import java.io.IOException;
-import java.math.BigInteger;
 
 class Experiment {
     static int maxDimension;
