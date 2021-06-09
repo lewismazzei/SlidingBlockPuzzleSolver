@@ -14,7 +14,14 @@ public class SlidingBlockPuzzleSolver {
             for (int i = 0; i < n * m; i++) {
                 blocks[i] = scanner.nextInt();
             }
-            System.out.print(Solve.bestFirstSearch(new Puzzle(n, m, blocks), new Solve.ManhattanHeuristic()));
+            switch (args[0]) {
+                case "manhattan":
+                    System.out.print(Solve.bestFirstSearch(new Puzzle(n, m, blocks), new Solve.ManhattanHeuristic()));
+                    break;
+                case "total":
+                    System.out.print(Solve.bestFirstSearch(new Puzzle(n, m, blocks), new Solve.TotalDistanceHeuristic()));
+                    break;
+            }
         } catch (NoSuchElementException|ArrayIndexOutOfBoundsException e) {
             System.err.println("-1\n[usage: n m block(1) block(2) ... block(n*m-1)]");
             System.exit(0);
