@@ -37,7 +37,7 @@ public class Solve {
                     s.append(String.format(" %d", move));
                 }
                 s.append("\n\n");
-                s.append(String.format("%d ms taken", System.currentTimeMillis() - startTime));
+                s.append(String.format("%d ms taken\n", System.currentTimeMillis() - startTime));
                 return s.toString();
             } else {
                 ArrayList<State> childStates = childStates(currentState);
